@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Topline Pavement Services — Internal Developer Guide</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0c;color:#ddd;display:flex;height:100vh;overflow:hidden}
+
+  /* SIDEBAR */
+  #sidebar{width:256px;background:#0f0f15;border-right:1px solid #1e1e2a;display:flex;flex-direction:column;flex-shrink:0}
+  #sidebar-header{padding:16px 14px 12px;border-bottom:2px solid #F5C300;background:#0c0c12}
+  #sidebar-steps{flex:1;overflow-y:auto;padding:10px 8px}
+  .nav-item{padding:10px 11px;border-radius:6px;margin-bottom:3px;cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+  .nav-item:hover{background:rgba(255,255,255,.04)}
+  .nav-item.active{border-left-color:var(--c)}
+  .nav-item .nav-title{font-size:11px;color:#666;font-weight:400;line-height:1.4}
+  .nav-item.active .nav-title{color:#fff;font-weight:700}
+  .nav-current{font-size:9px;font-weight:800;letter-spacing:.5px;margin-top:2px;display:none}
+  .nav-item.active .nav-current{display:block}
+  #sidebar-progress{padding:12px 14px;border-top:1px solid #1e1e2a;background:#0c0c12}
+  #prog-bar-wrap{height:5px;background:#1a1a28;border-radius:3px;margin:6px 0 6px}
+  #prog-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,#F5C300,#2B4FD4);transition:width .4s ease}
+  #prog-label{font-size:10px;color:#666}
+
+  /* MAIN */
+  #main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  #topbar{padding:22px 48px 18px;border-bottom:2px solid #F5C300;background:#0c0c12;position:relative;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+  #step-meta{font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+  #step-title{font-size:22px;color:#fff;font-weight:900;letter-spacing:.3px}
+  #step-sub{font-size:13px;color:#666;margin-top:4px}
+  #content{flex:1;overflow-y:auto;padding:28px 48px 48px}
+  #content-inner{max-width:740px}
+
+  /* SECTIONS */
+  .section{margin-bottom:28px}
+  .sec-heading{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+  .sec-heading span{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+  .sec-body{color:#bbb;line-height:1.8;font-size:14px;margin:0 0 14px 16px}
+  .step-row{display:flex;gap:13px;margin-bottom:10px;align-items:flex-start;padding-left:6px}
+  .step-num{min-width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;margin-top:1px}
+  .step-text{color:#ccc;line-height:1.78;font-size:14px}
+  .callout{display:flex;gap:14px;background:linear-gradient(135deg,#14141e,#0f0f1a);border-radius:8px;padding:16px 20px;margin-bottom:28px;border-left-width:4px;border-left-style:solid;border-top:1px solid;border-right:1px solid;border-bottom:1px solid}
+  .callout-icon{font-size:20px;flex-shrink:0}
+  .callout-text{color:#c8d8ff;font-size:14px;line-height:1.8}
+
+  /* DIAMOND ROW */
+  .diamond-row{display:flex;align-items:center;gap:8px;margin:32px 0 24px;opacity:.35}
+  .d{width:8px;height:8px;transform:rotate(45deg)}
+
+  /* NAV BUTTONS */
+  #nav-btns{display:flex;justify-content:space-between;align-items:center}
+  #btn-prev{padding:10px 24px;border-radius:6px;border:1px solid #1e1e2a;background:transparent;color:#aaa;cursor:pointer;font-size:13px;font-weight:600}
+  #btn-prev:disabled{color:#333;cursor:default}
+  #btn-next{padding:10px 28px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:900;letter-spacing:.5px}
+  #btn-done{padding:10px 22px;border-radius:6px;background:#0d1f0d;border:1px solid #34D399;color:#34D399;font-size:13px;font-weight:800;display:none}
+  .dots{display:flex;gap:6px;align-items:center}
+  .dot{height:6px;border-radius:3px;background:#1e1e2a;cursor:pointer;transition:all .2s;width:6px}
+  .dot.active{width:18px}
+
+  /* TOPLINE LOGO SVG + BADGE inline */
+  .logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .logo-text-wrap .t1{font-family:'Impact','Arial Black',sans-serif;font-size:15px;font-weight:900;color:#fff;letter-spacing:2px;line-height:1}
+  .logo-text-wrap .t2{font-size:9px;color:#2B4FD4;letter-spacing:2px;font-weight:700}
+  .tps-box{background:#F5C300;border-radius:6px;padding:5px 10px;font-family:'Impact','Arial Black',sans-serif;font-size:18px;font-weight:900;color:#000;letter-spacing:1px}
+
+  .guide-label{margin-top:10px;padding-top:10px;border-top:1px solid #1e1e2a;display:flex;align-items:center;gap:10px}
+  .guide-label .gl1{font-size:10px;color:#F5C300;font-weight:800;letter-spacing:1.5px}
+  .guide-label .gl2{font-size:11px;color:#aaa;line-height:1.4}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div id="sidebar-header">
+    <div class="logo-wrap">
+      <div class="tps-box">TPS</div>
+      <div class="logo-text-wrap">
+        <div class="t1">TOPLINE</div>
+        <div class="t2">PAVEMENT SERVICES</div>
+      </div>
+    </div>
+    <div class="guide-label">
+      <svg width="38" height="38" viewBox="0 0 200 200">
+        <polygon points="100,4 196,100 100,196 4,100" fill="#2B4FD4"/>
+        <polygon points="100,12 188,100 100,188 12,100" fill="#111"/>
+        <polygon points="100,20 180,100 100,180 20,100" fill="#F5C300"/>
+        <polygon points="44,136 156,136 180,100 100,180 20,100" fill="#111"/>
+        <polygon points="62,158 138,158 156,136 44,136" fill="#2B4FD4"/>
+        <text x="100" y="108" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="66" font-weight="900" fill="#111" letter-spacing="-2">40</text>
+        <text x="100" y="132" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="21" font-weight="900" fill="#111" letter-spacing="3">YEARS</text>
+        <text x="100" y="154" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="14" font-weight="900" fill="#F5C300" letter-spacing="2">OF TRUST</text>
+      </svg>
+      <div>
+        <div class="gl1">INTERNAL GUIDE</div>
+        <div class="gl2">Developer &amp; Web Creator<br>Deployment Handbook</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sidebar-steps"></div>
+
+  <div id="sidebar-progress">
+    <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+      <span style="font-size:10px;color:#666;letter-spacing:1px;font-weight:700">PROGRESS</span>
+      <span id="prog-pct" style="font-size:11px;color:#F5C300;font-weight:800">0%</span>
+    </div>
+    <div id="prog-bar-wrap"><div id="prog-bar" style="width:0%"></div></div>
+    <div id="prog-label">Step 1 of 6</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div>
+      <div id="step-meta"></div>
+      <div id="step-title"></div>
+      <div id="step-sub"></div>
+    </div>
+    <svg width="54" height="54" viewBox="0 0 200 200">
+      <polygon points="100,4 196,100 100,196 4,100" fill="#2B4FD4"/>
+      <polygon points="100,12 188,100 100,188 12,100" fill="#111"/>
+      <polygon points="100,20 180,100 100,180 20,100" fill="#F5C300"/>
+      <polygon points="44,136 156,136 180,100 100,180 20,100" fill="#111"/>
+      <polygon points="62,158 138,158 156,136 44,136" fill="#2B4FD4"/>
+      <text x="100" y="108" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="66" font-weight="900" fill="#111" letter-spacing="-2">40</text>
+      <text x="100" y="132" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="21" font-weight="900" fill="#111" letter-spacing="3">YEARS</text>
+      <text x="100" y="154" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="14" font-weight="900" fill="#F5C300" letter-spacing="2">OF TRUST</text>
+    </svg>
+  </div>
+  <div id="content"><div id="content-inner"></div></div>
+</div>
+
+<script>
+const GOLD='#F5C300', BLUE='#2B4FD4';
+
+const steps=[
+  {id:1,emoji:'💬',color:GOLD,title:'Get Your App Code from Claude',sub:'Claude builds the whole website — you just describe what you want.',
+   sections:[
+    {h:'What is Claude?',body:'Claude is an AI assistant at claude.ai. You type what you want, and it writes an entire website for you — no coding needed. Think of it like texting a very smart builder and watching them construct it in real time.'},
+    {h:'How to ask Claude to build your app',steps:['Open your browser (Chrome, Edge, or Safari) and go to claude.ai.','Log in or create a free account with your email.','Click the message box at the bottom of the screen.','Type what you want — be specific! Example: "Build me a single HTML file website for Topline Pavement Services with a dark theme, contact form, and yellow and black colour scheme."','Press Enter. Claude will start building. Watch the RIGHT side of the screen — a live preview appears. This box is called an Artifact.','Review the preview carefully. If anything looks off, tell Claude what to fix. Example: "Make the button yellow" or "Add our phone number."','Keep asking for tweaks until you are 100% happy.']},
+    {h:'IMPORTANT — Convert before copying',steps:['Before copying anything, type this exact message to Claude: "Convert this into a plain single-file HTML page that works when opened directly in a browser. No React, no frameworks, just HTML, CSS and JavaScript all in one file."','Wait for Claude to rebuild it. A new preview appears on the right — it should look identical.','Now look at the top-right corner of the Artifact preview box.','You will see a small icon that looks like two overlapping squares. Hover over it — it says Copy. Click it.','Open Notepad (Windows: search Notepad in taskbar) or TextEdit (Mac).','Press Ctrl+V (Windows) or Cmd+V (Mac) to paste.','Click File → Save As. Name the file exactly: index.html','Make sure it ends in .html — not .txt or anything else.','Save it to your Desktop or project folder.','Double-click the file. It should open in your browser and look exactly like the Claude preview.']},
+    {type:'callout',icon:'⚠️',body:"Why does it look broken without this step? Claude builds previews using React — a special tool that only runs inside Claude's environment. A plain browser cannot run it. Always ask Claude to convert to plain HTML first. If it still looks wrong, tell Claude: 'It still looks broken, please fix it for plain HTML.'"},
+    {type:'callout',icon:'💡',body:'Quick test: after saving your index.html, double-click it and it should open in Chrome/Edge/Safari looking exactly like the Claude preview. If it looks correct here, it will look correct on Netlify too.'}
+  ]},
+  {id:2,emoji:'📁',color:BLUE,title:'Create Your Project Folder',sub:'One folder per project. Keep it clean like a job site.',
+   sections:[
+    {h:'Why bother with a folder?',body:'Think of this like a job folder at the office. Every website gets its own folder so nothing gets mixed up. It takes 30 seconds and saves a lot of confusion down the road.'},
+    {h:'Creating the folder',steps:['Go to your Desktop.','Right-click on empty space on the Desktop.','Click New Folder (Windows) or File → New Folder (Mac).','Name it clearly using dashes instead of spaces. Example: topline-estimate-form or topline-contact-page.','Double-click the folder to open it.']},
+    {h:'Move your file into the folder',steps:['Find the index.html file you saved in Step 1.','Click and drag it into your new folder.','Your folder now contains one file: index.html. That is all you need.']},
+    {h:'Preview before going live',steps:['Double-click your index.html file.','It opens automatically in your web browser.','This is exactly how it will look online. Check every detail.','Something looks wrong? Go back to Claude, describe the issue, copy the updated plain HTML code, and replace your index.html file.']},
+    {type:'callout',icon:'⚠️',body:'The file must be named exactly index.html — lowercase, no spaces, ends in .html. If it is called Index.HTML or index.txt or website.html it will NOT work. Double-check before moving on.'}
+  ]},
+  {id:3,emoji:'🐙',color:'#9B7FE8',title:'Put Your Code on GitHub',sub:'GitHub is free cloud storage for your site files. No coding skills needed.',
+   sections:[
+    {h:'What is GitHub and why do I need it?',body:'GitHub is like Google Drive but for website files. Netlify — the platform that puts your site online — connects directly to GitHub to grab your files. You will only ever use the GitHub website. No complicated programs required.'},
+    {h:'Creating your free GitHub account',steps:['Go to github.com in your browser.','Click the green Sign up button in the top right.','Enter your work email address.','Create a strong password and write it down somewhere safe.','Choose a username — keep it professional. Example: topline-mike or toplinewebsites.','Complete the verification (usually a simple image puzzle).','Check your email for a confirmation link from GitHub — click it.','You now have a GitHub account!']},
+    {h:'Creating a new repository',body:"A repository — or 'repo' — is just a folder on GitHub for one specific website. Make a new one for each project.",steps:["Once logged in, look for a green 'New' button on the left, OR click the '+' icon in the top right and select 'New repository'.","In the Repository name box, type the project name using dashes. Example: topline-contact-form.","Make sure 'Public' is selected. Netlify needs to see it.","Leave everything else as-is.","Click the green 'Create repository' button.","You will land on a page showing your empty repo — ready for your file."]},
+    {h:'Uploading your index.html to GitHub',steps:["On your new repository page, find the link that says 'uploading an existing file' — click it.","A large dashed box will appear: 'Drag files here to add them to your repository'.","Open your project folder, grab index.html, and drag it into that dashed box on the GitHub page.","You will see the filename with a green checkmark when it is uploaded.","Scroll down to 'Commit changes'.","Do not change anything — just click the green 'Commit changes' button.","Wait 2–3 seconds. Your index.html now appears in your repository. It is on GitHub!"]},
+    {type:'callout',icon:'🔒',body:'Save your GitHub username and password somewhere safe — your phone notes, a password manager, or written down. You will need it every time you update a site.'}
+  ]},
+  {id:4,emoji:'🚀',color:'#34D399',title:'Deploy on Netlify — Go Live!',sub:'This is where your site gets a real URL anyone can visit.',
+   sections:[
+    {h:'What is Netlify?',body:'Netlify is a free platform that reads your files from GitHub and turns them into a live website with a real web address. You set it up once — after that, it runs automatically every time you make a change.'},
+    {h:'Creating your Netlify account',steps:['Go to netlify.com in your browser.','Click Sign up in the top right corner.','Click Sign up with GitHub — this links both accounts automatically.','A GitHub permission screen pops up. Click Authorize netlify.','You are now logged into Netlify using your GitHub account.']},
+    {h:'Connecting your GitHub project to Netlify',steps:["On your Netlify dashboard, click 'Add new site'.","Click 'Import an existing project'.","Click the 'GitHub' button.","A list of your GitHub repositories appears. Click the one you want to deploy — example: topline-contact-form.","You will see a settings page. Do NOT change anything.","Scroll down and click 'Deploy site'.","Wait about 30 seconds. When it shows a green dot and says 'Published' — your site is live."]},
+    {h:'Finding your live website address',steps:['On your site Netlify dashboard, look at the top of the page.','You will see a URL that looks like: random-words-12345.netlify.app','Click it. Your site is live and accessible to anyone in the world.','Copy the URL and share it with whoever needs it.']},
+    {type:'callout',icon:'🎉',body:'Your site is live! The whole process — from Claude to a live URL — takes about 10 minutes the first time. The second time it takes about 5.'}
+  ]},
+  {id:5,emoji:'✏️',color:'#FB923C',title:'Updating Your Site Later',sub:'Need to change something? Getting it live takes under 2 minutes.',
+   sections:[
+    {h:'How updates work',body:'Every time you upload a new index.html to GitHub, Netlify detects the change and updates your live site within about 30 seconds. You never need to touch Netlify again after the first setup.'},
+    {h:'How to update your site',steps:['Go back to claude.ai and describe what needs to change. Example: Change the phone number to 905-555-1234 or Make the header yellow.','Ask Claude to give you the updated plain HTML file again.','Copy the updated code, open Notepad or TextEdit, paste it, and save as index.html — replacing the old file.','Go to github.com and log in.','Open your repository (click its name from your GitHub homepage).','Click on your existing index.html file.','Click the pencil ✏️ icon in the top right of the file to enter edit mode.','Press Ctrl+A (Windows) or Cmd+A (Mac) to select all old code, then press Delete.','Press Ctrl+V or Cmd+V to paste the new code.','Scroll down and click Commit changes.','Done! Your live site updates automatically within 30 seconds.']},
+    {type:'callout',icon:'⚡',body:'Shortcut: You can also just delete the old index.html on GitHub and re-upload the new one using drag-and-drop from Step 3. Both methods work perfectly.'}
+  ]},
+  {id:6,emoji:'🗂️',color:'#F472B6',title:'Keeping Netlify Tidy & Organized',sub:'Managing multiple sites? Stay organized — that is the Topline standard.',
+   sections:[
+    {h:'Give your site a proper name',body:'By default Netlify assigns a random name like silly-panda-abc123. Here is how to rename it:',steps:['On your Netlify dashboard, click your site.','Click Site configuration in the left sidebar.','Click Change site name.','Type a clear name. Example: topline-estimate-form or topline-contact-2025.','Click Save. Your URL is now: topline-estimate-form.netlify.app']},
+    {h:'Keep a master list of all your sites',body:'As you build more sites it gets confusing fast. Set up a simple tracker:',steps:['Open a Google Doc or notes app.','Create a table: Site Name | Live URL | GitHub Repo | What It Is For | Date Created.','Example row: Estimate Form | topline-form.netlify.app | github.com/.../estimate-form | Customer quote requests | March 2025.','Update it every time you deploy a new site.','Share it with your team so everyone knows what is live.']},
+    {h:'Deleting old sites',steps:['Click the site in your Netlify dashboard.','Click Site configuration in the left sidebar.','Scroll to the very bottom of the page.','Click Delete this site.','Type the site name to confirm, then click the red delete button.','The site is gone. Old sites left up also do not cost anything.']},
+    {h:'Pro naming tip',steps:['Name your GitHub repo and your Netlify site the exact same thing.','Example: GitHub repo = topline-estimate-form AND Netlify site name = topline-estimate-form.','This makes it instantly obvious which repo matches which live site — no guessing.']},
+    {type:'callout',icon:'🏆',body:'Treat your sites like job sites — label everything clearly, keep a paper trail, and never leave a mess. That is the Topline standard.'}
+  ]}
+];
+
+let active=0;
+
+function diamond(color,size=8){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill="${color}"/></svg>`;
+}
+
+function renderSidebar(){
+  const el=document.getElementById('sidebar-steps');
+  el.innerHTML=steps.map((s,i)=>`
+    <div class="nav-item${i===active?' active':''}" style="--c:${s.color};background:${i===active?s.color+'14':'transparent'}" onclick="go(${i})">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="font-size:14px;margin-top:1px">${s.emoji}</span>
+        <div>
+          <div class="nav-title">${s.title}</div>
+          <div class="nav-current" style="color:${s.color}">◆ CURRENT</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderProgress(){
+  const pct=Math.round(((active+1)/steps.length)*100);
+  document.getElementById('prog-bar').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-label').textContent=`Step ${active+1} of ${steps.length}`;
+}
+
+function renderTopbar(){
+  const s=steps[active];
+  document.getElementById('topbar').style.borderBottomColor=s.color;
+  document.getElementById('topbar').style.background=`linear-gradient(135deg,#0c0c12 60%,${s.color}18)`;
+  document.getElementById('step-meta').innerHTML=`${diamond(s.color,9)} <span style="color:${s.color}">STEP ${s.id} OF ${steps.length}</span> ${diamond(s.color,9)}`;
+  document.getElementById('step-title').textContent=s.emoji+' '+s.title;
+  document.getElementById('step-sub').textContent=s.sub;
+}
+
+function renderContent(){
+  const s=steps[active];
+  const numColor=s.color===GOLD?'#000':'#fff';
+  let html='';
+  s.sections.forEach(sec=>{
+    if(sec.type==='callout'){
+      html+=`<div class="callout" style="border-left-color:${s.color};border-color:${s.color}44">
+        <div class="callout-icon">${sec.icon}</div>
+        <div class="callout-text">${sec.body}</div>
+      </div>`;
+    } else {
+      html+=`<div class="section">
+        <div class="sec-heading">${diamond(s.color,8)}<span style="color:${s.color}">${sec.h}</span></div>
+        ${sec.body?`<p class="sec-body">${sec.body}</p>`:''}
+        ${(sec.steps||[]).map((t,j)=>`
+          <div class="step-row">
+            <div class="step-num" style="background:${s.color};color:${numColor}">${j+1}</div>
+            <div class="step-text">${t}</div>
+          </div>`).join('')}
+      </div>`;
+    }
+  });
+  // diamond divider
+  html+=`<div class="diamond-row">${Array(14).fill(0).map(()=>`<div class="d" style="background:${s.color}"></div>`).join('')}</div>`;
+  // nav
+  const isLast=active===steps.length-1;
+  const isFirst=active===0;
+  html+=`<div id="nav-btns">
+    <button id="btn-prev" onclick="go(${active-1})" ${isFirst?'disabled':''}>← Previous</button>
+    <div class="dots">${steps.map((_,i)=>`<div class="dot${i===active?' active':''}" style="${i===active?'background:'+s.color+';width:18px':''}" onclick="go(${i})"></div>`).join('')}</div>
+    ${isLast
+      ?`<div id="btn-done" style="display:block">✅ You're Live!</div>`
+      :`<button id="btn-next" onclick="go(${active+1})" style="background:${s.color};color:${numColor}">Next Step →</button>`}
+  </div>`;
+  document.getElementById('content-inner').innerHTML=html;
+}
+
+function go(i){
+  if(i<0||i>=steps.length)return;
+  active=i;
+  renderSidebar();
+  renderProgress();
+  renderTopbar();
+  renderContent();
+  document.getElementById('content').scrollTop=0;
+}
+
+go(0);
+</script>
+</body>
+</html>
